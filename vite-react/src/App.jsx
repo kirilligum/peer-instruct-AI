@@ -2,34 +2,51 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
-import { useWallets } from '@privy-io/react-auth';
-import { sepolia } from 'viem/chains';
+import { LightSmartContractAccount } from '@alchemy/aa-accounts';
+import { AlchemyProvider } from '@alchemy/aa-alchemy';
+import { WalletClientSigner } from '@alchemy/aa-core';
 import { createWalletClient, custom } from 'viem';
-import { WalletClientSigner, type SmartAccountSigner } from "@alchemy/aa-core";
+import { sepolia } from 'viem/chains';
 
+import { useWallets } from '@privy-io/react-auth';
 
 // Find the embedded wallet and get its EIP1193 provider
 function App() {
   const [count, setCount] = useState(0)
   const { wallets } = useWallets();
-  const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
-  let eip1193provider, privyClient;
-  if (embeddedWallet) {
-    eip1193provider = embeddedWallet.getEthereumProvider();
+  // The code below makes use of Privy's React hooks. You must paste
+  // or use it within a React Component or Context.
 
-    // Create a viem WalletClient from the embedded wallet's EIP1193 provider
-    privyClient = createWalletClient({
-      account: embeddedWallet.address,
-      chain: sepolia,
-      transport: custom(eip1193provider)
-    });
+  // Find the user's embedded wallet
+  const { wallets } = useWallets();
+  const embeddedWallet = wallets.find((wallet) => wallet.walletClientType === 'privy');
 
-    // Create an AccountKit SmartAccountSigner from the embedded wallet
-    const privySigner: SmartAccountSigner = new WalletClientSigner(
-        privyClient,
-        "json-rpc"
-    );
-  }
+  // Get a viem client from the embedded wallet
+  const eip1193provider = await embeddedWallet.getEthereumProvider();
+  const privyClient = createWalletClient({
+    account: embeddedWallet.address,
+    chain: sepolia,
+    transport: custom(eip1193provider),
+  });
+
+  // Create a smart account signer from the embedded wallet's viem client
+  const privySigner = new WalletClientSigner(privyClient, 'json-rpc');
+
+  // Create an Alchemy Provider with the smart account signer
+  const provider = new AlchemyProvider({
+    apiKey: 'insert-your-alchemy-api-key',
+    chain: sepolia,
+    entryPointAddress: '0x...',
+  }).connect(
+    (rpcClient) =>
+      new LightSmartContractAccount({
+        entryPointAddress: '0x...',
+        chain: rpcClient.chain,
+        owner: privySigner,
+        factoryAddress: getDefaultLightAccountFactory(rpcClient.chain),
+        rpcClient,
+      }),
+  );
 
   return (
     <>
