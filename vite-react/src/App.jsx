@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
@@ -18,35 +18,41 @@ function App() {
   // or use it within a React Component or Context.
 
   // Find the user's embedded wallet
-  const { wallets } = useWallets();
-  const embeddedWallet = wallets.find((wallet) => wallet.walletClientType === 'privy');
+  useEffect(() => {
+    const initWallet = async () => {
+      const { wallets } = useWallets();
+      const embeddedWallet = wallets.find((wallet) => wallet.walletClientType === 'privy');
 
-  // Get a viem client from the embedded wallet
-  const eip1193provider = await embeddedWallet.getEthereumProvider();
-  const privyClient = createWalletClient({
-    account: embeddedWallet.address,
-    chain: sepolia,
-    transport: custom(eip1193provider),
-  });
+      // Get a viem client from the embedded wallet
+      const eip1193provider = await embeddedWallet.getEthereumProvider();
+      const privyClient = createWalletClient({
+        account: embeddedWallet.address,
+        chain: sepolia,
+        transport: custom(eip1193provider),
+      });
 
-  // Create a smart account signer from the embedded wallet's viem client
-  const privySigner = new WalletClientSigner(privyClient, 'json-rpc');
+      // Create a smart account signer from the embedded wallet's viem client
+      const privySigner = new WalletClientSigner(privyClient, 'json-rpc');
 
-  // Create an Alchemy Provider with the smart account signer
-  const provider = new AlchemyProvider({
-    apiKey: 'insert-your-alchemy-api-key',
-    chain: sepolia,
-    entryPointAddress: '0x...',
-  }).connect(
-    (rpcClient) =>
-      new LightSmartContractAccount({
+      // Create an Alchemy Provider with the smart account signer
+      const provider = new AlchemyProvider({
+        apiKey: 'insert-your-alchemy-api-key',
+        chain: sepolia,
         entryPointAddress: '0x...',
-        chain: rpcClient.chain,
-        owner: privySigner,
-        factoryAddress: getDefaultLightAccountFactory(rpcClient.chain),
-        rpcClient,
-      }),
-  );
+      }).connect(
+        (rpcClient) =>
+          new LightSmartContractAccount({
+            entryPointAddress: '0x...',
+            chain: rpcClient.chain,
+            owner: privySigner,
+            factoryAddress: getDefaultLightAccountFactory(rpcClient.chain),
+            rpcClient,
+          }),
+      );
+    };
+
+    initWallet();
+  }, []);
 
   return (
     <>
