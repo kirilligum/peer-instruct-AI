@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { PrivyProvider } from '@privy-io/react-auth';
 import App from './App.jsx'
+import eyeIcon from './iconeye.png';
 import './index.css'
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -17,7 +18,7 @@ root.render(
         appearance: {
           theme: 'light',
           accentColor: '#676FFF',
-          logo: 'iconeye.png',
+          logo: eyeIcon,
         },
         // Create embedded wallets for users who don't have a wallet
         embeddedWallets: {
