@@ -5,6 +5,7 @@ import './App.css'
 import { useWallets } from '@privy-io/react-auth';
 import { sepolia } from 'viem/chains';
 import { createWalletClient, custom } from 'viem';
+import { WalletClientSigner, type SmartAccountSigner } from "@alchemy/aa-core";
 
 
 // Find the embedded wallet and get its EIP1193 provider
@@ -22,6 +23,12 @@ function App() {
       chain: sepolia,
       transport: custom(eip1193provider)
     });
+
+    // Create an AccountKit SmartAccountSigner from the embedded wallet
+    const privySigner: SmartAccountSigner = new WalletClientSigner(
+        privyClient,
+        "json-rpc"
+    );
   }
 
   return (
