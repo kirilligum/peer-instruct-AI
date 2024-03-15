@@ -2,9 +2,24 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import { useWallets } from '@privy-io/react-auth';
+import { sepolia } from 'viem/chains';
+import { createWalletClient, custom } from 'viem';
 
+
+// Find the embedded wallet and get its EIP1193 provider
 function App() {
   const [count, setCount] = useState(0)
+  const { wallets } = useWallets();
+  const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
+  const eip1193provider = embeddedWallet.getEthereumProvider();
+
+  // Create a viem WalletClient from the embedded wallet's EIP1193 provider
+  const privyClient = createWalletClient({
+    account: embeddedWallet.address,
+    chain: sepolia,
+    transport: custom(eip1193provider)
+  });
 
   return (
     <>
