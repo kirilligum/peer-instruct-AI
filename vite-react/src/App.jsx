@@ -3,7 +3,7 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import { LightSmartContractAccount } from '@alchemy/aa-accounts';
-import { AlchemyProvider } from '@alchemy/aa-alchemy';
+import AlchemyProvider from '@alchemy/aa-alchemy';
 import { WalletClientSigner } from '@alchemy/aa-core';
 import { createWalletClient, custom } from 'viem';
 import { sepolia } from 'viem/chains';
