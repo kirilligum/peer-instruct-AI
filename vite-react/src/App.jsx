@@ -12,14 +12,17 @@ function App() {
   const [count, setCount] = useState(0)
   const { wallets } = useWallets();
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
-  const eip1193provider = embeddedWallet.getEthereumProvider();
+  let eip1193provider, privyClient;
+  if (embeddedWallet) {
+    eip1193provider = embeddedWallet.getEthereumProvider();
 
-  // Create a viem WalletClient from the embedded wallet's EIP1193 provider
-  const privyClient = createWalletClient({
-    account: embeddedWallet.address,
-    chain: sepolia,
-    transport: custom(eip1193provider)
-  });
+    // Create a viem WalletClient from the embedded wallet's EIP1193 provider
+    privyClient = createWalletClient({
+      account: embeddedWallet.address,
+      chain: sepolia,
+      transport: custom(eip1193provider)
+    });
+  }
 
   return (
     <>
